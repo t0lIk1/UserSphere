@@ -16,6 +16,26 @@ export class UsersService {
   ) {}
 
   async createUser(dto: CreateUserDto) {
+    const candidateByEmail = await this.userRepository.findOne({
+      where: { email: dto.email },
+    });
+    if (candidateByEmail) {
+      throw new HttpException(
+        'A user with such email already exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const candidateByName = await this.userRepository.findOne({
+      where: { name: dto.name },
+    });
+    if (candidateByName) {
+      throw new HttpException(
+        'A user with such name already exists',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     return this.userRepository.create(dto);
   }
 
@@ -24,7 +44,10 @@ export class UsersService {
   }
 
   async findOneUser(email: string) {
-    return await this.userRepository.findOne({ where: { email } });
+    return await this.userRepository.findOne({
+      where: { email },
+      include: { all: true },
+    });
   }
 
   async deleteUser(id: number) {
@@ -33,27 +56,40 @@ export class UsersService {
     await user.destroy();
   }
 
-  async unblockUser(id: number) {
-    const user = await this.validateUser(id);
-    console.log(user);
-    if (!user.dataValues.isBlocked) {
+  async blockUsers(ids: number[]) {
+    const users = await this.userRepository.findAll({
+      where: { id: ids },
+    });
+
+    if (users.length !== ids.length) {
       throw new HttpException(
-        `User with ID ${id} is not blocked`,
-        HttpStatus.BAD_REQUEST,
+        'Some users were not found',
+        HttpStatus.NOT_FOUND,
       );
     }
-    await this.userRepository.update({ isBlocked: false }, { where: { id } });
+
+    await this.userRepository.update(
+      { isBlocked: true },
+      { where: { id: ids } },
+    );
   }
 
-  async blockUser(id: number) {
-    const user = await this.validateUser(id);
-    if (user.dataValues.isBlocked) {
+  async unblockUsers(ids: number[]) {
+    const users = await this.userRepository.findAll({
+      where: { id: ids },
+    });
+
+    if (users.length !== ids.length) {
       throw new HttpException(
-        `User with ID ${id} is already blocked`,
-        HttpStatus.BAD_REQUEST,
+        'Some users were not found',
+        HttpStatus.NOT_FOUND,
       );
     }
-    await this.userRepository.update({ isBlocked: true }, { where: { id } });
+
+    await this.userRepository.update(
+      { isBlocked: false },
+      { where: { id: ids } },
+    );
   }
 
   async validateUser(identifier: number) {

@@ -10,6 +10,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from '../users/users.model';
+import { LoginUserDto } from '../users/dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(@Body() userDto: CreateUserDto) {
+  async login(@Body() userDto: LoginUserDto) {
     const user = await this.validateUser(userDto);
     return this.generateToken(user);
   }
@@ -40,27 +41,34 @@ export class AuthService {
   }
 
   generateToken(user: User) {
-    const payload = { email: user.dataValues.email, id: user.id }; // Используйте user.email
+    const payload = {
+      name: user.dataValues.name,
+      email: user.dataValues.email,
+      id: user.id,
+    };
     return {
       token: this.jwtService.sign(payload),
     };
   }
 
-  private async validateUser(userDto: CreateUserDto) {
+  private async validateUser(userDto: LoginUserDto) {
     const user = await this.usersService.findOneUser(userDto.email);
-
+    console.log(user, '000OK');
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
+    console.log(user, '000OK');
 
     if (user.dataValues.isBlocked) {
       throw new HttpException('User is blocked', HttpStatus.FORBIDDEN);
     }
+    console.log(user, '000OK');
 
     if (!userDto.password || !user.dataValues.password) {
       console.error('Invalid credentials:', { userDto, user });
       throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
     }
+    console.log(user, "000OK")
 
     const passwordEquals = await bcrypt.compare(
       userDto.password,

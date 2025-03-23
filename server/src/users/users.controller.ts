@@ -7,9 +7,12 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -30,18 +33,22 @@ export class UsersController {
     return this.usersService.findOneUser(email);
   }
 
-  @Put('/:id/block')
-  blockUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.blockUser(id);
+  @Put('/block')
+  @UseGuards(JwtAuthGuard)
+  blockUsers(@Body() body: { ids: number[] }) {
+    return this.usersService.blockUsers(body.ids);
   }
 
-  @Put('/:id/unblock')
-  unblockUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.unblockUser(id);
+  @Put('/unblock')
+  @UseGuards(JwtAuthGuard)
+  unblockUsers(@Body() body: { ids: number[] }) {
+    return this.usersService.unblockUsers(body.ids);
   }
 
   @Delete('/:id')
+  @UseGuards(JwtAuthGuard)
   deleteUser(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.deleteUser(id);
   }
+
 }
