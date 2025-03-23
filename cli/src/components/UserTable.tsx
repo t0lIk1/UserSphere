@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
 import {blockUsers, deleteUser, fetchUsers, getUserStatus, unblockUsers} from './api';
 import useAuthError from '../../hooks/useAuthError';
 
@@ -14,7 +13,6 @@ interface User {
 const UserTable: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-    const navigate = useNavigate();
     useAuthError();
 
     useEffect(() => {

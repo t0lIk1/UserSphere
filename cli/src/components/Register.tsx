@@ -19,7 +19,13 @@ const Register: React.FC = () => {
                 setError('Registration failed');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            // Проверяем, является ли ошибка объектом и имеет ли свойство response
+            if (err && typeof err === 'object' && 'response' in err) {
+                const axiosError = err as { response: { data: { message: string } } };
+                setError(axiosError.response?.data?.message || 'Registration failed');
+            } else {
+                setError('Registration failed');
+            }
         }
     };
 
