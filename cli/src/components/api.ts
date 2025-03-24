@@ -4,9 +4,7 @@ import axiosInstance from "../axiosInstance.ts";
 import {API_BASE_URL} from "../config.ts";
 
 export const login = async (email: string, password: string) => {
-
-    console.log(await axiosInstance.get(`/auth/users`))
-    const response = await axiosInstance.post(`/auth/login`, { email, password });
+    const response = await axiosInstance.post(`${API_BASE_URL}/auth/login`, { email, password });
     return response.data;
 };
 export const register = async (name: string, email: string, password: string) => {

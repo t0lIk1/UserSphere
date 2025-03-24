@@ -12,8 +12,9 @@ const Login: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-
+            console.log('Attempting to login with:', { email });
             const response = await login(email, password);
+            console.log('Login response:', response);
             if (response.token) {
                 localStorage.setItem('token', response.token);
                 navigate('/users');
@@ -21,6 +22,7 @@ const Login: React.FC = () => {
                 setError('Invalid credentials');
             }
         } catch (err) {
+            console.error('Login error:', err);
             // Проверяем, является ли ошибка объектом и имеет ли свойство response
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response: { data: { message: string } } };
