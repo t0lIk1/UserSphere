@@ -63,7 +63,7 @@ export class AuthService {
     }
 
     if (user.dataValues.isBlocked) {
-      throw new HttpException('Пользователь заблокирован', HttpStatus.FORBIDDEN);
+      throw new HttpException('User is blocked', HttpStatus.FORBIDDEN);
     }
 
     const passwordEquals = await bcrypt.compare(
