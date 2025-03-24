@@ -8,7 +8,7 @@ import NotFound from './components/NotFound';
 
 const App: React.FC = () => {
     return (
-        <Router basename="sphere/">
+        <Router>
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
