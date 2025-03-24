@@ -53,22 +53,18 @@ export class AuthService {
 
   private async validateUser(userDto: LoginUserDto) {
     const user = await this.usersService.findOneUser(userDto.email);
-    console.log(user, '000OK');
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    console.log(user, '000OK');
-
-    if (user.dataValues.isBlocked) {
-      throw new HttpException('User is blocked', HttpStatus.FORBIDDEN);
-    }
-    console.log(user, '000OK');
 
     if (!userDto.password || !user.dataValues.password) {
       console.error('Invalid credentials:', { userDto, user });
       throw new HttpException('Invalid credentials', HttpStatus.BAD_REQUEST);
     }
-    console.log(user, "000OK")
+
+    if (user.dataValues.isBlocked) {
+      throw new HttpException('Пользователь заблокирован', HttpStatus.FORBIDDEN);
+    }
 
     const passwordEquals = await bcrypt.compare(
       userDto.password,

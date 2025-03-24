@@ -33,7 +33,7 @@ export class JwtAuthGuard implements CanActivate {
       }
 
       if (user.isBlocked) {
-        throw new UnauthorizedException({ message: 'User is blocked' });
+        throw new UnauthorizedException({ message: '1' });
       }
 
       req.user = user;
