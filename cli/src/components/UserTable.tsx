@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {blockUsers, deleteUsers, fetchUsers, getUserStatus, unblockUsers} from './api';
 import useAuthError from '../../hooks/useAuthError';
+import {toast, ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {FaLock, FaTrash, FaUnlock} from 'react-icons/fa';
 
 interface User {
     id: number;
@@ -23,6 +26,10 @@ const UserTable: React.FC = () => {
                 const usersLocal = await fetchUsers();
                 setUsers(usersLocal);
             } catch (error) {
+                toast.error("Error fetching users. Please try again later.", {
+                    position: "bottom-right",
+                    autoClose: 5000,
+                });
                 console.error("Error fetching users:", error);
             }
         };
@@ -34,9 +41,17 @@ const UserTable: React.FC = () => {
     };
 
     const checkUserAndRedirect = async () => {
-        const isBlocked = await getUserStatus();
-        if (isBlocked) {
-            logoutAndRedirect();
+        try {
+            const isBlocked = await getUserStatus();
+            if (isBlocked) {
+                logoutAndRedirect();
+            }
+        } catch (error) {
+            toast.error("Error checking user status", {
+                position: "bottom-right",
+                autoClose: 5000,
+            });
+            console.error("Error checking user status:", error);
         }
     };
 
@@ -45,7 +60,10 @@ const UserTable: React.FC = () => {
             await checkUserAndRedirect();
 
             if (selectedUsers.length === 0) {
-                alert("Please select at least one user");
+                toast.warning("Please select at least one user", {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                });
                 return;
             }
 
@@ -54,7 +72,10 @@ const UserTable: React.FC = () => {
                     users.find(user => user.id === id)?.isBlocked
                 );
                 if (!areAllBlocked) {
-                    alert("You can only unblock blocked users");
+                    toast.warning("You can only unblock blocked users", {
+                        position: "bottom-right",
+                        autoClose: 3000,
+                    });
                     return;
                 }
             }
@@ -64,27 +85,44 @@ const UserTable: React.FC = () => {
                     !users.find(user => user.id === id)?.isBlocked
                 );
                 if (!areAllActive) {
-                    alert("You can only block active users");
+                    toast.warning("You can only block active users", {
+                        position: "bottom-right",
+                        autoClose: 3000,
+                    });
                     return;
                 }
             }
 
             if (action === "delete") {
                 await deleteUsers(selectedUsers);
+                toast.success("Users deleted successfully", {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                });
             } else if (action === "block") {
                 await blockUsers(selectedUsers);
+                toast.success("Users blocked successfully", {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                });
             } else if (action === "unblock") {
                 await unblockUsers(selectedUsers);
+                toast.success("Users unblocked successfully", {
+                    position: "bottom-right",
+                    autoClose: 3000,
+                });
             }
 
             const updatedUsers = await fetchUsers();
             setUsers(updatedUsers);
             setSelectedUsers([]);
         } catch (error) {
+            toast.error(`Error ${action} users. Please try again.`, {
+                position: "bottom-right",
+                autoClose: 5000,
+            });
             console.error(`Error ${action} users:`, error);
         }
-
-
     };
 
     const handleSelectUser = (userId: number) => {
@@ -115,16 +153,27 @@ const UserTable: React.FC = () => {
 
     return (
         <div className="container mt-5">
+            <ToastContainer/>
             <h2>User Management</h2>
-            <div className="mb-3">
-                <button className="btn btn-danger me-2" onClick={() => handleAction("block")}>
+            <div className="mb-3 d-flex ">
+                <button
+                    className="btn btn-danger me-2 d-flex align-items-center justify-content-center"
+                    onClick={() => handleAction("block")}
+                >
+                    <FaLock className="me-2"/>
                     Block
                 </button>
-                <button className="btn btn-warning me-2" onClick={() => handleAction("unblock")}>
-                    Unblock
+                <button
+                    className="btn btn-warning me-2 d-flex align-items-center justify-content-center"
+                    onClick={() => handleAction("unblock")}
+                >
+                    <FaUnlock/>
                 </button>
-                <button className="btn btn-dark" onClick={() => handleAction("delete")}>
-                    Delete
+                <button
+                    className="btn btn-dark d-flex align-items-center"
+                    onClick={() => handleAction("delete")}
+                >
+                    <FaTrash/>
                 </button>
             </div>
 
@@ -157,17 +206,15 @@ const UserTable: React.FC = () => {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>
-            <span className={`badge ${user.isBlocked ? "bg-danger" : "bg-success"}`}>
-              {user.isBlocked ? "Blocked" : "Active"}
-            </span>
+                            <span className={`badge ${user.isBlocked ? "bg-danger" : "bg-success"}`}>
+                                {user.isBlocked ? "Blocked" : "Active"}
+                            </span>
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
         </div>
-
-
     );
 };
 
