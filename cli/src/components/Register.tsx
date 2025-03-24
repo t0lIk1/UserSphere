@@ -16,15 +16,14 @@ const Register: React.FC = () => {
             if (response.token) {
                 navigate('/login');
             } else {
-                setError('Registration failed');
+                setError('Registration failed 1');
             }
         } catch (err) {
-            // Проверяем, является ли ошибка объектом и имеет ли свойство response
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response: { data: { message: string } } };
-                setError(axiosError.response?.data?.message || 'Registration failed');
+                setError(axiosError.response?.data?.message || 'Registration failed3');
             } else {
-                setError('Registration failed');
+                setError('Registration failed2');
             }
         }
     };
