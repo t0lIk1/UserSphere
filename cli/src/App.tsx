@@ -4,6 +4,7 @@ import UserTable from './components/UserTable';
 import Login from './components/Login';
 import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
+import NotFound from "./components/NotFound.tsx";
 
 const App: React.FC = () => {
     return (
@@ -31,6 +32,7 @@ const AppContent: React.FC = () => {
                 <Route path="/users" element={<UserTable/>}/>
             </Route>
             <Route path="/" element={<Navigate to="/login"/>}/>
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 };

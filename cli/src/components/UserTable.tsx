@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {blockUsers, deleteUser, fetchUsers, getUserStatus, unblockUsers} from './api';
+import {blockUsers, deleteUsers, fetchUsers, getUserStatus, unblockUsers} from './api';
 import useAuthError from '../../hooks/useAuthError';
 
 interface User {
@@ -13,13 +13,15 @@ interface User {
 const UserTable: React.FC = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+    const [selectAll, setSelectAll] = useState(false);
+
     useAuthError();
 
     useEffect(() => {
         const loadUsers = async () => {
             try {
-                const users = await fetchUsers();
-                setUsers(users);
+                const usersLocal = await fetchUsers();
+                setUsers(usersLocal);
             } catch (error) {
                 console.error("Error fetching users:", error);
             }
@@ -42,8 +44,8 @@ const UserTable: React.FC = () => {
         try {
             await checkUserAndRedirect();
 
-            if (action === "delete" && selectedUsers.length !== 1) {
-                alert("Please select exactly one user to delete");
+            if (selectedUsers.length === 0) {
+                alert("Please select at least one user");
                 return;
             }
 
@@ -68,7 +70,7 @@ const UserTable: React.FC = () => {
             }
 
             if (action === "delete") {
-                await deleteUser(selectedUsers[0]);
+                await deleteUsers(selectedUsers);
             } else if (action === "block") {
                 await blockUsers(selectedUsers);
             } else if (action === "unblock") {
@@ -81,12 +83,29 @@ const UserTable: React.FC = () => {
         } catch (error) {
             console.error(`Error ${action} users:`, error);
         }
+
+
     };
 
     const handleSelectUser = (userId: number) => {
-        setSelectedUsers(prev =>
-            prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
-        );
+        setSelectedUsers(prev => {
+            const newSelectedUsers = prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId];
+            setSelectAll(newSelectedUsers.length === users.length && users.length > 0);
+            return newSelectedUsers;
+        });
+    };
+
+    useEffect(() => {
+        setSelectAll(selectedUsers.length === users.length && users.length > 0);
+    }, [selectedUsers, users]);
+
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedUsers([]);
+        } else {
+            setSelectedUsers(users.map(user => user.id));
+        }
+        setSelectAll(!selectAll);
     };
 
     const blockedStyle = {
@@ -112,7 +131,14 @@ const UserTable: React.FC = () => {
             <table className="table table-striped">
                 <thead className="table-dark">
                 <tr>
-                    <th>Select</th>
+                    <th>
+                        <input
+                            type="checkbox"
+                            checked={selectAll && users.length > 0}
+                            onChange={handleSelectAll}
+                            disabled={users.length === 0}
+                        />
+                    </th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Status</th>
@@ -131,15 +157,17 @@ const UserTable: React.FC = () => {
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>
-                                <span className={`badge ${user.isBlocked ? "bg-danger" : "bg-success"}`}>
-                                    {user.isBlocked ? "Blocked" : "Active"}
-                                </span>
+            <span className={`badge ${user.isBlocked ? "bg-danger" : "bg-success"}`}>
+              {user.isBlocked ? "Blocked" : "Active"}
+            </span>
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
         </div>
+
+
     );
 };
 

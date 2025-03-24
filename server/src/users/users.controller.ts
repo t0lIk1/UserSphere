@@ -4,10 +4,8 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Put,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
@@ -45,10 +43,9 @@ export class UsersController {
     return this.usersService.unblockUsers(body.ids);
   }
 
-  @Delete('/:id')
+  @Delete('/delete')
   @UseGuards(JwtAuthGuard)
-  deleteUser(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.deleteUser(id);
+  deleteUsers(@Body() body: { ids: number[] }) {
+    return this.usersService.deleteUsers(body.ids);
   }
-
 }

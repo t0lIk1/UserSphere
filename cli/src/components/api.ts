@@ -21,12 +21,12 @@ export const fetchUsers = async () => {
 export const getUserStatus = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-        throw new Error('Токен не найден в localStorage');
+        throw new Error('token not found in localStorage');
     }
     const payload = JSON.parse(atob(token.split('.')[1]));
     const email = payload.email;
     if (!email) {
-        throw new Error('Email не найден в токене');
+        throw new Error('Email not found in token');
     }
     const response = await axiosInstance.get(`${API_BASE_URL}/users/${email}`);
     return response.data.isBlocked;
@@ -42,7 +42,7 @@ export const unblockUsers = async (userIds: number[]) => {
     return response.data;
 };
 
-export const deleteUser = async (userId: number) => {
-    const response = await axiosInstance.delete(`${API_BASE_URL}/users/${userId}`);
+export const deleteUsers = async (userIds: number[]) => {
+    const response = await axiosInstance.delete(`${API_BASE_URL}/users/delete`, { data: { ids: userIds } });
     return response.data;
 };

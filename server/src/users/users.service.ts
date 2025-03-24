@@ -50,10 +50,21 @@ export class UsersService {
     });
   }
 
-  async deleteUser(id: number) {
-    const user = await this.validateUser(id);
-
-    await user.destroy();
+  async deleteUsers(ids: number[]): Promise<void> {
+    const users = await this.userRepository.findAll({
+      where: { id: ids },
+    });
+    if (users.length !== ids.length) {
+      throw new HttpException(
+        'Some users were not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    await this.userRepository.destroy({
+      where: {
+        id: ids,
+      },
+    });
   }
 
   async blockUsers(ids: number[]) {
