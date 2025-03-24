@@ -7,7 +7,7 @@ async function start() {
   const PORT = process.env.PORT ?? 3000;
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: process.env.FRONTEND_ORIGIN,
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
